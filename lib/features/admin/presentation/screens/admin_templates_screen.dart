@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_skeleton.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../providers/admin_providers.dart';
 
 class AdminTemplatesScreen extends ConsumerWidget {
@@ -27,9 +30,7 @@ class AdminTemplatesScreen extends ConsumerWidget {
             await ref.read(adminBillTemplatesProvider.future);
           },
           child: templatesAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
+            loading: () => AppSkeleton.list(itemCount: 4),
             error: (err, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -60,7 +61,11 @@ class AdminTemplatesScreen extends ConsumerWidget {
             ),
             data: (templates) {
               if (templates.isEmpty) {
-                return const Center(child: Text('Belum ada template tagihan'));
+                return const AppEmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Belum Ada Template Tagihan',
+                  subtitle: 'Daftar template iuran dan tagihan warga akan ditampilkan di sini.',
+                );
               }
 
               return ListView.separated(
@@ -113,22 +118,10 @@ class AdminTemplatesScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: template.bOccurence
-                                ? AppColors.success.withValues(alpha: 0.1)
-                                : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            template.bOccurence ? 'Rutin' : 'Sekali',
-                            style: TextStyle(
-                              color: template.bOccurence ? AppColors.success : Colors.grey.shade700,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
-                          ),
+                        StatusBadge(
+                          label: template.bOccurence ? 'Rutin' : 'Sekali',
+                          type: template.bOccurence ? StatusBadgeType.success : StatusBadgeType.neutral,
+                          isCompact: true,
                         ),
                       ],
                     ),

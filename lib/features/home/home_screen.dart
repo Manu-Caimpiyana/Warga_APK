@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/app_skeleton.dart';
 import 'data/dto/activity_data.dart';
 import 'data/dto/dash_board_data.dart';
 import 'data/dto/info_data.dart';
@@ -29,8 +30,36 @@ class HomeScreen extends ConsumerWidget {
             await ref.read(homeDashboardProvider.future);
           },
           child: dashboardAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            loading: () => AppSkeleton(
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        AppSkeleton.box(width: 48, height: 48, borderRadius: BorderRadius.circular(24)),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppSkeleton.text(width: 100, height: 12),
+                            const SizedBox(height: 6),
+                            AppSkeleton.text(width: 150, height: 16),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    AppSkeleton.card(height: 140, margin: EdgeInsets.zero),
+                    const SizedBox(height: 24),
+                    AppSkeleton.card(height: 80, margin: EdgeInsets.zero),
+                    const SizedBox(height: 24),
+                    AppSkeleton.card(height: 120, margin: EdgeInsets.zero),
+                  ],
+                ),
+              ),
             ),
             error: (error, stack) => _buildErrorState(context, ref, error),
             data: (data) => _buildDashboardContent(context, ref, data),
