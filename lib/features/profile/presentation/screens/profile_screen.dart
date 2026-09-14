@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_skeleton.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../data/dto/citizen_info_data.dart';
 import '../providers/profile_provider.dart';
@@ -30,8 +31,31 @@ class ProfileScreen extends ConsumerWidget {
             await ref.read(citizenProfileProvider.future);
           },
           child: profileAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+            loading: () => AppSkeleton(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             error: (err, _) => _buildErrorState(context, ref, err),
             data: (profile) => _buildProfileContent(context, ref, profile),

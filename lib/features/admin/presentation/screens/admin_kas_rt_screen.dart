@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_skeleton.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../providers/admin_providers.dart';
 
@@ -75,9 +78,7 @@ class AdminKasRtScreen extends ConsumerWidget {
             await ref.read(adminCashInOutProvider.future);
           },
           child: cashAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
+            loading: () => AppSkeleton.list(itemCount: 4),
             error: (err, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -216,13 +217,10 @@ class AdminKasRtScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   if (transactions.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Belum ada transaksi kas tercatat',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
+                    const AppEmptyState(
+                      icon: Icons.account_balance_wallet_outlined,
+                      title: 'Belum Ada Transaksi Kas',
+                      subtitle: 'Catatan kas masuk dan keluar RT akan tampil di sini.',
                     )
                   else
                     ...transactions.map((t) {
@@ -277,13 +275,20 @@ class AdminKasRtScreen extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            Text(
-                              '${isIncoming ? "+" : "-"} ${currencyFormatter.format(t.decAmount)}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: isIncoming ? AppColors.success : AppColors.error,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${isIncoming ? "+" : "-"} ${currencyFormatter.format(t.decAmount)}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: isIncoming ? AppColors.success : AppColors.error,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                isIncoming ? StatusBadge.inflow() : StatusBadge.outflow(),
+                              ],
                             ),
                           ],
                         ),

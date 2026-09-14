@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_skeleton.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../data/dto/my_bill_item_data.dart';
 import '../providers/my_bills_provider.dart';
 
@@ -36,9 +39,7 @@ class BillingScreen extends ConsumerWidget {
         ),
         body: SafeArea(
           child: billsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
+            loading: () => AppSkeleton.list(itemCount: 4),
             error: (err, _) => _buildErrorState(context, ref, err),
             data: (bills) => TabBarView(
               children: [
@@ -135,29 +136,9 @@ class BillingScreen extends ConsumerWidget {
         await ref.read(myBillsProvider.future);
       },
       child: items.isEmpty
-          ? SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.6,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(emptyIcon, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 16),
-                    Text(
-                      emptyMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          ? AppEmptyState(
+              icon: emptyIcon,
+              title: emptyMessage,
             )
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(
@@ -232,7 +213,7 @@ class BillingScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            _buildStatusBadge(isPaid),
+                            isPaid ? StatusBadge.lunas() : StatusBadge.belumLunas(),
                           ],
                         ),
                         const Divider(height: 24),
@@ -291,27 +272,7 @@ class BillingScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(bool isPaid) {
-    final color = isPaid ? AppColors.success : AppColors.error;
-    final label = isPaid ? 'Lunas' : 'Belum Lunas';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 
   void _showBillDetail(
     BuildContext context,
@@ -353,7 +314,7 @@ class BillingScreen extends ConsumerWidget {
                     'Rincian Tagihan',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  _buildStatusBadge(isPaid),
+                  isPaid ? StatusBadge.lunas() : StatusBadge.belumLunas(),
                 ],
               ),
               const SizedBox(height: 16),

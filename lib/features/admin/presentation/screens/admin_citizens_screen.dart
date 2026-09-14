@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_skeleton.dart';
 import '../../../profile/data/dto/citizen_data.dart';
 import '../providers/admin_providers.dart';
 
@@ -89,9 +91,7 @@ class _AdminCitizensScreenState extends ConsumerState<AdminCitizensScreen> {
                   await ref.read(adminCitizensProvider.future);
                 },
                 child: citizensAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  ),
+                  loading: () => AppSkeleton.list(itemCount: 4),
                   error: (err, _) => _buildErrorState(context, err),
                   data: (citizens) {
                     final filtered = citizens.where((c) {
@@ -102,18 +102,14 @@ class _AdminCitizensScreenState extends ConsumerState<AdminCitizensScreen> {
                     }).toList();
 
                     if (filtered.isEmpty) {
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Container(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          alignment: Alignment.center,
-                          child: Text(
-                            _searchQuery.isEmpty
-                                ? 'Belum ada data warga terdaftar'
-                                : 'Tidak ditemukan warga dengan kata kunci "$_searchQuery"',
-                            style: TextStyle(color: Colors.grey.shade600),
-                          ),
-                        ),
+                      return AppEmptyState(
+                        icon: Icons.people_outline,
+                        title: _searchQuery.isEmpty
+                            ? 'Belum Ada Data Warga'
+                            : 'Warga Tidak Ditemukan',
+                        subtitle: _searchQuery.isEmpty
+                            ? 'Data warga Kartu Keluarga akan ditampilkan di sini.'
+                            : 'Tidak ditemukan warga dengan kata kunci "$_searchQuery"',
                       );
                     }
 
